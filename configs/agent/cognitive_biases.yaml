@@ -1,0 +1,4 @@
+_target_: shachi.agent.cognitive_biases_agent.create_agents_structuredoutput
+num_agents: 0
+model: "openai/gpt-4o-mini"
+temperature: 0

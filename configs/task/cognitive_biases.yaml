@@ -1,0 +1,37 @@
+_target_: shachi.env.cognitive_biases.cognitive_biases_env.CognitiveBiasTask
+dataset_file_path: data/full_dataset.csv
+decision_results_dir: data/decision_results
+max_trial_steps: 1
+randomly_flip_options: True
+shuffle_answer_options: False
+target_biases:
+  - AvailabilityHeuristic
+  - InGroupBias
+  - Anthropomorphism
+  - FundamentalAttributionError
+  - EndowmentEffect
+  - NotInventedHere
+  - SurvivorshipBias
+  - Stereotyping
+  - NegativityBias
+  - ConfirmationBias
+  - PlanningFallacy
+  - StatusQuoBias
+  - HindsightBias
+  - HaloEffect
+  - RiskCompensation
+  - InformationBias
+  - DispositionEffect
+  - HyperbolicDiscounting
+  - MentalAccounting
+  - SocialDesirabilityBias
+  - IllusionOfControl
+  - SelfServingBias
+  - Anchoring
+  - OptimismBias
+  - EscalationOfCommitment
+  - FramingEffect
+  - Conservatism
+  - Reactance
+  - BandwagonEffect
+  - LossAversion

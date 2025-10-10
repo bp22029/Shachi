@@ -1,0 +1,11 @@
+_target_: shachi.env.econagent.econenv.EconAgentTask
+num_parallel: 1
+model: "openai/gpt-4o-mini"
+num_agents: 100
+dialog_len: 3
+max_price_inflation: 0.1
+max_wage_inflation: 0.05
+save_suffix: ""
+save_path: "./outputs/econagent/"
+extra_instruction_key: "0000"
+episode_length: 240

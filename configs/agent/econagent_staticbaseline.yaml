@@ -1,0 +1,3 @@
+_target_: shachi.agent.econagent.create_agents_static_baseline
+num_agents: null # Foolproof: Will raise error if it is not not overriden.
+method: "complex"

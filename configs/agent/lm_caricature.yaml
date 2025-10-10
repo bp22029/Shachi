@@ -1,0 +1,5 @@
+_target_: shachi.agent.lm_caricature.create_agents
+num_agents: null # Foolproof: Will raise error if it is not not overriden.
+model: "openai/gpt-4o-mini"
+max_tokens: 256
+context_memory_load_path: null

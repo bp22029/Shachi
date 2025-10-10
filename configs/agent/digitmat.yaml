@@ -1,0 +1,6 @@
+_target_: shachi.agent.digitmat_agent.create_agents_functioncalling
+num_agents: 0
+model: "openai/gpt-4"
+temperature: 0
+max_tokens: 10
+stop: "\n"

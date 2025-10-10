@@ -1,0 +1,7 @@
+_target_: shachi.agent.stockagent.create_agents_functioncalling
+num_agents: 0
+model: "openai/gpt-4o"
+temperature: 1.0
+memory_cls_path: shachi.agent.stockagent.HistoryMemory
+memory_cls_kwargs:
+  history_length: 3

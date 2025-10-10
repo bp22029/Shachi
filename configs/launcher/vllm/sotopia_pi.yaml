@@ -1,0 +1,9 @@
+enable: true
+host: 127.0.0.1
+port: 8000
+model: mistralai/Mistral-7B-Instruct-v0.1
+enable_lora: true
+lora_modules:
+  sotopia-bc-sr: cmu-lti/sotopia-pi-mistral-7b-BC_SR
+tool_call_parser: mistral
+extra_args: "--gpu-memory-utilization 0.7 --max-num-seqs 2048"

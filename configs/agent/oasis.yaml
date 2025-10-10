@@ -1,0 +1,7 @@
+_target_: shachi.agent.oasisagent.create_agents_functioncalling
+num_agents: 0
+model: "openai/gpt-4o-mini"
+temperature: 0.5
+memory_cls_path: shachi.agent.oasisagent.CamelMemory
+memory_cls_kwargs:
+  window_size: 5

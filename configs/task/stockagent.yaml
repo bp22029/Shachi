@@ -1,0 +1,6 @@
+_target_: shachi.env.stockagent.stockenv.StockAgentTask
+num_parallel: 1
+num_agents: 50
+total_date: 264
+total_session: 3
+order_book: false

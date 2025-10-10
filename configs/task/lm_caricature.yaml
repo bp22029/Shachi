@@ -1,0 +1,7 @@
+_target_: shachi.env.lm_caricature.lm_caricature_env.LMCaricatureTask
+num_parallel: 1
+scenario: twitter
+model: openai/gpt-4o
+num_agents: 100
+num_per_gen: 1
+save_prefix: "./outputs/lm_caricature/"

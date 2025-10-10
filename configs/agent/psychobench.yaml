@@ -1,0 +1,10 @@
+_target_: shachi.agent.psychobench.create_agents_structuredoutput
+num_agents: null
+model: "openai/gpt-4o-mini"
+model_api_base: null
+parser_model: "openai/gpt-4o-mini"
+temperature: 0.01
+# Those memories are unused in psychobench task
+memory_cls_path: shachi.agent.stockagent.HistoryMemory
+memory_cls_kwargs:
+  history_length: 5

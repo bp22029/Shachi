@@ -1,0 +1,18 @@
+_target_: shachi.env.auction_arena.auction_env.AuctionTask
+num_auctions: 10
+item_order: "random"
+bidders:
+  - {budget: 20000, desire_desc: "maximize_profit"}
+  - {budget: 20000, desire_desc: "maximize_profit"}
+  - {budget: 20000, desire_desc: "maximize_profit"}
+items:
+  - {name: "Widget A", price: 1000, desc: "A widget for all your needs", id: 1, _true_value: 2000, estimated_value: 2200}
+  - {name: "Gadget B", price: 3000, desc: "A gadget with all the latest features", id: 2, _true_value: 6000, estimated_value: 6600}
+  - {name: "Thingamajig C", price: 4000, desc: "A little thing that is sure to impress", id: 3, _true_value: 8000, estimated_value: 8800}
+  - {name: "Doodad D", price: 2000, desc: "A durable doodad that will last for years", id: 4, _true_value: 4000, estimated_value: 4400}
+  - {name: "Equipment E", price: 5000, desc: "A piece of equipment for any tough job", id: 5, _true_value: 10000, estimated_value: 11000}
+  - {"name": "Gizmo F", "price": 3000, "desc": "A gizmo that will surprise and delight", "id": 6, "_true_value": 6000, estimated_value: 6600}
+  - {"name": "Implement G", "price": 2000, "desc": "A implement for everyday tasks", "id": 7, "_true_value": 4000, estimated_value: 4400}
+  - {"name": "Apparatus H", "price": 4000, "desc": "An apparatus for specialized operations", "id": 8, "_true_value": 8000, estimated_value: 8800}
+  - {"name": "Contraption I", "price": 1000, "desc": "A contraption that sparks creativity", "id": 9, "_true_value": 2000, estimated_value: 2200}
+  - {"name": "Mechanism J", "price": 5000, "desc": "A mechanism for repetitive tasks", "id": 10, "_true_value": 10000, estimated_value: 11000}

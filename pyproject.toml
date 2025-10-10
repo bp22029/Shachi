@@ -1,0 +1,107 @@
+[project]
+name = "shachi"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = []
+requires-python = ">=3.10"
+dependencies = [
+    # base
+    "fire>=0.7.0",
+    "litellm>=1.61.3",
+    "lz4",
+    "matplotlib>=3.10.1",
+    "numpy",
+    "openai",
+    "python-dateutil",
+    # experiment
+    "hydra-core",
+    # memory
+    "camel-ai==0.2.2",
+    "pillow",
+    "mem0ai==0.1.70",
+    # stockagent
+    "pandas",
+    "colorama",
+    "protobuf>=4,<5",
+    "tiktoken",
+    "procoder",
+    "openpyxl",
+    # OASIS
+    "igraph==0.11.6",
+    "neo4j==5.23.0",
+    "sentence-transformers",
+    "unstructured",
+    # EmotionBench
+    "seaborn>=0.13.2",
+    "umap>=0.1.1",
+    # SocioDojo
+    "selenium>=4.30.0",
+    # Sotopia
+    "sotopia==0.1.4",
+    # AuctionArena
+    "inflect>=7.5.0",
+    "trueskill>=0.4.5",
+    # lm_caricature
+    "nltk>=3.9.1",
+    "types-python-dateutil>=2.9.0.20250516",
+    "types-pyyaml>=6.0.12.20250516",
+    "vllm>=0.8.5.post1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "mypy==1.15.0",
+    "ruff==0.11.4",
+]
+
+[project.urls]
+repository = "https://github.com/SakanaAI/shachi_refactor"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+procoder = { git = "https://github.com/dhh1995/PromptCoder.git" }
+
+# ---- mypy ----
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+disallow_any_generics = false
+files = ["src"]
+mypy_path = "src"
+explicit_package_bases = true
+exclude = ".venv|venv|build|docs|tutorial|data|examples|cache|(src/shachi/env/(EmotionBench|auction_arena|cognitive_biases|econagent|emergent_analogies_LLM|lm_caricature|oasis|psychobench|sotopia|stockagent))"
+
+# ---- ruff ----
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = [
+    "src/shachi/env/EmotionBench/**",
+    "src/shachi/env/auction_arena/**",
+    "src/shachi/env/cognitive_biases/**",
+    "src/shachi/env/econagent/**",
+    "src/shachi/env/emergent_analogies_LLM/**",
+    "src/shachi/env/lm_caricature/**",
+    "src/shachi/env/oasis/**",
+    "src/shachi/env/psychobench/**",
+    "src/shachi/env/sotopia/**",
+    "src/shachi/env/stockagent/**",
+]
+
+[tool.ruff.lint]
+# E/F: pycodestyle/pyflakes, I: isort, UP: pyupgrade
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.format]
+docstring-code-format = true

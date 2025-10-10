@@ -1,0 +1,4 @@
+_target_: shachi.agent.econagent.create_agents_structuredoutput
+num_agents:
+model: "openai/gpt-4o-mini"
+memory_save_path: null

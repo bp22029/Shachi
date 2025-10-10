@@ -1,0 +1,5 @@
+_target_: shachi.env.emergent_analogies_LLM.digit_mat.digitmat_env.DigitMatTask
+data_path: all_problems_1thru5.npz
+target_prob_types: null
+each_prob_num: 20
+max_trial_steps: 1

@@ -1,0 +1,12 @@
+_target_: shachi.env.emotionBench.emotionenv.EmotionBenchTask
+args:
+  questionnaire: "PANAS"
+  emotion: "ALL"
+  select_count: 5
+  default_shuffle_count: 2
+  emotion_shuffle_count: 1
+  test_count: 1
+  significance_level: 0.01
+  mode: "auto"
+  seed: 42
+max_trial_steps: 1

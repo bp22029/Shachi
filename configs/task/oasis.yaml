@@ -1,0 +1,4 @@
+_target_: shachi.env.oasis.snsenv.SNSTask
+num_parallel: 3
+config_path: gpt_example.yaml
+max_steps: 10

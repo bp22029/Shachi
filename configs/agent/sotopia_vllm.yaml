@@ -1,0 +1,4 @@
+_target_: shachi.agent.sotopia.create_agents
+num_agents: 2
+model: hosted_vllm/sotopia-bc-sr
+temperature: 1.0

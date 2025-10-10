@@ -1,0 +1,2 @@
+_target_: shachi.agent.psychobench.create_agents_random
+num_agents: null

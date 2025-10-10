@@ -1,0 +1,2 @@
+_target_: shachi.agent.sotopia.create_random_agents
+num_agents: 2

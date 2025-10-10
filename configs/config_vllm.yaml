@@ -1,0 +1,12 @@
+defaults:
+  - _self_
+  - task: sotopia
+  - agent: sotopia_vllm
+  - launcher/vllm: sotopia_pi
+
+num_episodes: 1
+batchsize: 100
+
+hydra:
+  run:
+    dir: outputs/hydra/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}

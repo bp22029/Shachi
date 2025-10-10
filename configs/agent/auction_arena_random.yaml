@@ -1,0 +1,16 @@
+_target_: shachi.agent.auction_arena.create_agents_structuredoutput
+num_agents: null
+
+agents_config:
+  - &common_config
+    model: "openrouter/openai/gpt-3.5-turbo-1106"
+    parser_model: "openrouter/openai/gpt-4.1-nano"
+    temperature: 0.0
+    memory_cls_name: shachi.agent.auction_arena.CamelMemory
+    memory_cls_kwargs:
+      window_size: 20
+      token_limit: 10000
+  - <<: *common_config
+    model: "openrouter/openai/gpt-4-1106-preview"
+  - <<: *common_config
+    is_random: True
