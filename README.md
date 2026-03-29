@@ -1,6 +1,6 @@
 
 
-<h1 align="center" style="margin:0;"> <div style="display:flex; align-items:center; justify-content:center; gap:20px;"> <img src="docs/orca.png" alt="Shachi icon" width="120"> <h1 align="center">Shachi (鯱)</h1> </div> <div style="margin-top:10px; font-size:1.3em; font-weight:normal;"> Reimagining Agent-based Modeling with Large Language Model Agents </div> </h1>
+<h1 align="center" style="margin:0;"> <div style="display:flex; align-items:center; justify-content:center; gap:20px;"> <img src="docs/orca.png" alt="Shachi icon" width="120"> <h1 align="center">Shachi (鯱)</h1> </div> <div style="margin-top:10px; font-size:1.3em; font-weight:normal;"> Shachi: A Modular, Controllable Framework for LLM-Based Agent-Based Modeling of Emergent Collective Behavior </div> </h1>
 
 <p align="center">
   <a href="https://github.com/SakanaAI/shachi_refactor/actions/workflows/checks.yml"><img alt="Checks" src="https://github.com/SakanaAI/shachi_refactor/actions/workflows/checks.yml/badge.svg"></a>
