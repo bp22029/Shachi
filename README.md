@@ -3,7 +3,7 @@
 <h1 align="center" style="margin:0;"> <div style="display:flex; align-items:center; justify-content:center; gap:20px;"> <img src="docs/orca.png" alt="Shachi icon" width="120"> <h1 align="center">Shachi (鯱)</h1> </div> <div style="margin-top:10px; font-size:1.3em; font-weight:normal;"> Shachi: A Modular, Controllable Framework for LLM-Based Agent-Based Modeling of Emergent Collective Behavior </div> </h1>
 
 <p align="center">
-  <a href="https://github.com/SakanaAI/shachi_refactor/actions/workflows/checks.yml"><img alt="Checks" src="https://github.com/SakanaAI/shachi_refactor/actions/workflows/checks.yml/badge.svg"></a>
+  <a href="https://github.com/SakanaAI/shachi/actions/workflows/checks.yml"><img alt="Checks" src="https://github.com/SakanaAI/shachi/actions/workflows/checks.yml/badge.svg"></a>
   <img alt="Python" src="https://img.shields.io/badge/python-%3E%3D3.10-blue">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
   <a href="https://github.com/astral-sh/ruff"><img alt="ruff" src="https://img.shields.io/badge/code%20style-ruff-informational"></a>
