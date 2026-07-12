@@ -1,0 +1,55 @@
+# Shachi dependencies for conda (Windows) environment, excluding vllm.
+# vllm is Linux/CUDA-only and is not needed when connecting to an external
+# LLM server. LoRA experiments (scripts/main_vllm.py) are therefore unavailable.
+#
+# Usage:
+#   conda create -n shachi python=3.11 -y   # camel-ai==0.2.2 requires <3.12
+#   conda activate shachi
+#   pip install -r requirements-conda.txt
+#   pip install -e . --no-deps
+#
+# StockAgent additionally needs `procoder` (PromptCoder), which is only on GitHub:
+#   pip install "procoder @ git+https://github.com/dhh1995/PromptCoder.git"
+
+# base
+fire>=0.7.0
+litellm>=1.61.3
+lz4
+matplotlib>=3.10.1
+numpy
+openai
+python-dateutil
+# experiment
+hydra-core
+# memory
+camel-ai==0.2.2
+pillow
+mem0ai==0.1.70
+# stockagent
+pandas
+colorama
+protobuf>=4,<5
+tiktoken
+openpyxl
+# OASIS
+igraph==0.11.6
+neo4j==5.23.0
+sentence-transformers
+unstructured
+# EmotionBench
+seaborn>=0.13.2
+# NOTE: pyproject lists `umap`, but src/.../cognitive_biases/analysis.py uses
+# umap.UMAP(), which is provided by `umap-learn` (the PyPI `umap` 0.1.1 sdist is
+# unavailable / does not provide that API).
+umap-learn>=0.5.0
+# SocioDojo
+selenium>=4.30.0
+# Sotopia
+sotopia==0.1.4
+# AuctionArena
+inflect>=7.5.0
+trueskill>=0.4.5
+# lm_caricature
+nltk>=3.9.1
+types-python-dateutil>=2.9.0.20250516
+types-pyyaml>=6.0.12.20250516

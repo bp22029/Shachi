@@ -4,7 +4,39 @@ import os
 import pickle
 
 import hydra
+import litellm
 from hydra.core.hydra_config import HydraConfig
+
+# --- ローカルLLMサーバー(MLX等)対策 ---
+# サーバーがまれに壊れた(=JSONとして解析不能な)応答を返したり、リクエストが
+# 長時間ハングすることがある。タイムアウトを短めにして各試行を打ち切り、
+# litellm.acompletion をリトライ付きラッパーで包んで自動で取り直す。
+# 各エージェントは `litellm.acompletion` をモジュール属性経由で呼ぶため、
+# ここで差し替えれば全タスクに一括で適用される。
+litellm.request_timeout = 150  # 秒。通常の応答は数十秒なので十分な余裕
+litellm.num_retries = 2        # 接続レベルの一時的失敗向け(ラッパーとは別レイヤ)
+
+_LLM_MAX_ATTEMPTS = 8
+_orig_acompletion = litellm.acompletion
+
+
+async def _acompletion_with_retry(*args, **kwargs):
+    last_exc = None
+    for attempt in range(1, _LLM_MAX_ATTEMPTS + 1):
+        try:
+            return await _orig_acompletion(*args, **kwargs)
+        except Exception as e:  # 壊れた応答(InternalServerError)/タイムアウト等を再試行
+            last_exc = e
+            logging.warning(
+                f"LLM 呼び出し失敗 (試行 {attempt}/{_LLM_MAX_ATTEMPTS}): "
+                f"{type(e).__name__}: {str(e)[:150]} — リトライします"
+            )
+            await asyncio.sleep(min(2 ** attempt, 20))
+    logging.error(f"LLM 呼び出しが {_LLM_MAX_ATTEMPTS} 回とも失敗しました")
+    raise last_exc
+
+
+litellm.acompletion = _acompletion_with_retry
 
 
 async def chunked(aiter, size):

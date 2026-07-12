@@ -4,7 +4,7 @@ defaults:
   - agent: psychobench
 
 num_episodes: 1
-batchsize: 100
+batchsize: 16
 
 hydra:
   run:

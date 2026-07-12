@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shachi コードベース構造ガイド</title>
+<style>
+  :root {
+    --bg: #f7f9fb;
+    --card: #ffffff;
+    --ink: #1f2933;
+    --sub: #52606d;
+    --accent: #0b6e99;
+    --accent-light: #e3f1f8;
+    --agent: #b45309;
+    --agent-bg: #fef3e2;
+    --env: #15803d;
+    --env-bg: #e8f7ec;
+    --core: #6d28d9;
+    --core-bg: #f1eafe;
+    --cfg: #be185d;
+    --cfg-bg: #fdeaf2;
+    --border: #d9e2ec;
+    --code-bg: #263238;
+    --code-ink: #eceff1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.75;
+  }
+  header {
+    background: linear-gradient(135deg, #0b3954 0%, #0b6e99 100%);
+    color: #fff; padding: 40px 24px 32px;
+  }
+  header h1 { margin: 0 0 8px; font-size: 1.9em; }
+  header p { margin: 4px 0; opacity: .92; max-width: 900px; }
+  .badge { display: inline-block; background: rgba(255,255,255,.18); border-radius: 20px; padding: 2px 12px; margin: 8px 6px 0 0; font-size: .82em; }
+  nav {
+    position: sticky; top: 0; z-index: 10; background: var(--card);
+    border-bottom: 1px solid var(--border); padding: 8px 24px;
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  nav a { color: var(--accent); text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: .9em; }
+  nav a:hover { background: var(--accent-light); }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px; }
+  section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; margin-bottom: 28px; }
+  h2 { margin-top: 0; color: var(--accent); border-bottom: 2px solid var(--accent-light); padding-bottom: 8px; }
+  h3 { color: #334e68; margin-bottom: 6px; }
+  code { background: #eef2f6; padding: 1px 6px; border-radius: 4px; font-size: .9em; }
+  pre { background: var(--code-bg); color: var(--code-ink); padding: 16px; border-radius: 8px; overflow-x: auto; font-size: .86em; line-height: 1.55; }
+  pre code { background: none; color: inherit; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .92em; }
+  th { background: var(--accent-light); color: #0b3954; text-align: left; }
+  th, td { border: 1px solid var(--border); padding: 8px 12px; vertical-align: top; }
+  tr:nth-child(even) td { background: #fbfdfe; }
+  .tag { display: inline-block; border-radius: 4px; padding: 0 8px; font-size: .8em; font-weight: 600; }
+  .tag.core { background: var(--core-bg); color: var(--core); }
+  .tag.agent { background: var(--agent-bg); color: var(--agent); }
+  .tag.env { background: var(--env-bg); color: var(--env); }
+  .tag.cfg { background: var(--cfg-bg); color: var(--cfg); }
+  .tree { font-family: Consolas, "Courier New", monospace; font-size: .88em; background: #fbfdfe; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; white-space: pre; overflow-x: auto; line-height: 1.6; }
+  .tree .c { color: var(--sub); }
+  .tree .core { color: var(--core); font-weight: 600; }
+  .tree .agent { color: var(--agent); font-weight: 600; }
+  .tree .env { color: var(--env); font-weight: 600; }
+  .tree .cfg { color: var(--cfg); font-weight: 600; }
+  .note { background: #fffbe8; border-left: 4px solid #f0b429; padding: 10px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+  .card-mini { border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; background: #fbfdfe; }
+  .card-mini h4 { margin: 0 0 6px; }
+  figure { margin: 16px 0; text-align: center; }
+  figcaption { color: var(--sub); font-size: .85em; margin-top: 6px; }
+  footer { text-align: center; color: var(--sub); font-size: .85em; padding: 24px; }
+  /* --- task detail cards --- */
+  .lvhead { margin: 22px 0 6px; font-size: 1.02em; color: #334e68; border-left: 4px solid var(--env); padding-left: 10px; }
+  .taskcard { border: 1px solid var(--border); border-left: 5px solid var(--env); border-radius: 8px; padding: 14px 20px; margin: 12px 0; background: #fbfdfe; }
+  .taskcard h3 { margin: 0 0 8px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; color: #1f2933; }
+  .taskcard p { margin: 5px 0; }
+  .taskcard p .lbl { color: var(--env); font-weight: 700; }
+  .lv { font-size: .7em; font-weight: 700; border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+  .lv1 { background: var(--env-bg); color: var(--env); }
+  .lv2 { background: var(--accent-light); color: var(--accent); }
+  .lv3 { background: var(--core-bg); color: var(--core); }
+  .alias { font-size: .72em; font-weight: 500; color: var(--sub); background: #eef2f6; border-radius: 4px; padding: 2px 8px; }
+  .files { font-size: .84em; background: #fff; border: 1px dashed var(--border); border-radius: 6px; padding: 8px 12px; margin-top: 8px; }
+  .files div { margin: 2px 0; }
+  .files .k { display: inline-block; min-width: 82px; color: var(--sub); font-weight: 600; }
+  .files code { background: #eef2f6; }
+  .answer-table td:first-child { font-weight: 600; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Shachi (鯱) コードベース構造ガイド</h1>
+  <p>LLMベースのエージェント・ベースト・モデリング(ABM)のためのモジュラーフレームワーク。エージェントを <b>LLM / Tools / Memory / Config</b> の4コアに分離し、gymスタイルの統一APIで環境と接続することで、再現性の高い社会・経済・認知シミュレーション実験を実現する。</p>
+  <div>
+    <span class="badge">Python ≥ 3.10</span>
+    <span class="badge">Hydra 設定管理</span>
+    <span class="badge">litellm 経由でLLM呼び出し</span>
+    <span class="badge">Pydantic による型付きメッセージ</span>
+    <span class="badge">asyncio 並行実行</span>
+    <span class="badge">uv 依存管理</span>
+  </div>
+</header>
+
+<nav>
+  <a href="#overview">全体像</a>
+  <a href="#architecture">アーキテクチャ</a>
+  <a href="#tree">ディレクトリ構成</a>
+  <a href="#core">コア抽象クラス</a>
+  <a href="#flow">実行フロー</a>
+  <a href="#config">設定システム</a>
+  <a href="#tasks">実装済みタスク</a>
+  <a href="#answering">読み解き方・参照ガイド</a>
+  <a href="#extend">拡張方法</a>
+  <a href="#tests">テスト・品質</a>
+</nav>
+
+<main>
+
+<section id="overview">
+  <h2>1. 全体像 — 3層構造</h2>
+  <p>Shachi のコードは大きく <b>3つの層</b> に分かれる。理解の起点は約360行の <code>src/shachi/base.py</code> で、ここに全ての抽象クラスが定義されている。残りのコードはすべてこの抽象の「実装」である。</p>
+  <div class="grid2">
+    <div class="card-mini">
+      <h4><span class="tag core">コア層</span> src/shachi/base.py</h4>
+      8つの抽象クラス(<code>Agent</code>, <code>Environment</code>, <code>Task</code>, <code>Observation</code>, <code>Message</code>, <code>Tool</code>, <code>ToolResponse</code>, <code>BaseMemory</code>)を定義。フレームワークの契約(インターフェース)そのもの。
+    </div>
+    <div class="card-mini">
+      <h4><span class="tag agent">エージェント層</span> src/shachi/agent/</h4>
+      10タスク分のエージェント実装(各1ファイル、計約2,700行)。litellm でLLMを呼び、Structured Output または Function Calling で環境が要求する型に応答を整形する。
+    </div>
+    <div class="card-mini">
+      <h4><span class="tag env">環境層</span> src/shachi/env/</h4>
+      10タスク分の環境実装(各1ディレクトリ)。元論文のコードを移植した依存コード(<code>dep/</code> など)やデータセットも同梱。コード量の大半はここ。
+    </div>
+    <div class="card-mini">
+      <h4><span class="tag cfg">実行・設定層</span> scripts/ + configs/</h4>
+      Hydra 設定 (<code>configs/</code>) とエントリポイント (<code>scripts/main.py</code> など)。<code>task=xxx agent=yyy</code> の組み合わせをCLIから差し替えるだけで実験を切り替えられる。
+    </div>
+  </div>
+  <div class="note"><b>設計思想:</b> エージェントと環境は互いのクラスを直接知らず、<code>Observation</code>(環境→エージェント)と <code>str | BaseModel | None</code>(エージェント→環境)だけでやり取りする。この疎結合により「同じエージェント実装を別環境で使う」「エージェントだけランダム版に差し替える」等が設定変更のみで可能になる。</div>
+</section>
+
+<section id="architecture">
+  <h2>2. アーキテクチャ図</h2>
+  <figure>
+  <svg viewBox="0 0 900 560" xmlns="http://www.w3.org/2000/svg" style="max-width:100%; height:auto;">
+    <defs>
+      <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#52606d"/></marker>
+    </defs>
+    <!-- config layer -->
+    <rect x="20" y="20" width="860" height="90" rx="10" fill="#fdeaf2" stroke="#be185d"/>
+    <text x="40" y="48" font-size="16" font-weight="bold" fill="#be185d">Hydra 設定層 (configs/)</text>
+    <rect x="40" y="60" width="180" height="36" rx="6" fill="#fff" stroke="#be185d"/><text x="130" y="83" font-size="13" text-anchor="middle">config.yaml</text>
+    <rect x="250" y="60" width="180" height="36" rx="6" fill="#fff" stroke="#be185d"/><text x="340" y="83" font-size="13" text-anchor="middle">task/*.yaml (10種)</text>
+    <rect x="460" y="60" width="190" height="36" rx="6" fill="#fff" stroke="#be185d"/><text x="555" y="83" font-size="13" text-anchor="middle">agent/*.yaml (14種)</text>
+    <rect x="680" y="60" width="180" height="36" rx="6" fill="#fff" stroke="#be185d"/><text x="770" y="83" font-size="13" text-anchor="middle">launcher/vllm/*.yaml</text>
+    <!-- runner -->
+    <rect x="270" y="150" width="360" height="60" rx="10" fill="#e3f1f8" stroke="#0b6e99" stroke-width="2"/>
+    <text x="450" y="175" font-size="15" font-weight="bold" text-anchor="middle" fill="#0b3954">scripts/main.py</text>
+    <text x="450" y="195" font-size="12" text-anchor="middle" fill="#334e68">hydra.utils.instantiate → run_episode ループ</text>
+    <line x1="450" y1="110" x2="450" y2="148" stroke="#52606d" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- task -->
+    <rect x="330" y="245" width="240" height="54" rx="10" fill="#f1eafe" stroke="#6d28d9" stroke-width="2"/>
+    <text x="450" y="268" font-size="14" font-weight="bold" text-anchor="middle" fill="#6d28d9">Task</text>
+    <text x="450" y="287" font-size="11.5" text-anchor="middle" fill="#334e68">iterate_environments / aggregate_results</text>
+    <line x1="450" y1="210" x2="450" y2="243" stroke="#52606d" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- environment -->
+    <rect x="80" y="350" width="330" height="150" rx="10" fill="#e8f7ec" stroke="#15803d" stroke-width="2"/>
+    <text x="245" y="378" font-size="15" font-weight="bold" text-anchor="middle" fill="#15803d">Environment (src/shachi/env/)</text>
+    <text x="245" y="400" font-size="12" text-anchor="middle" fill="#334e68">reset() / step(responses) / done() / get_result()</text>
+    <rect x="100" y="415" width="130" height="30" rx="6" fill="#fff" stroke="#15803d"/><text x="165" y="435" font-size="11.5" text-anchor="middle">Message (Pydantic)</text>
+    <rect x="240" y="415" width="150" height="30" rx="6" fill="#fff" stroke="#15803d"/><text x="315" y="435" font-size="11.5" text-anchor="middle">Observation (Pydantic)</text>
+    <rect x="100" y="455" width="130" height="30" rx="6" fill="#fff" stroke="#15803d"/><text x="165" y="475" font-size="11.5" text-anchor="middle">Tool / ToolResponse</text>
+    <rect x="240" y="455" width="150" height="30" rx="6" fill="#fff" stroke="#15803d"/><text x="315" y="475" font-size="11.5" text-anchor="middle">response_type 指定</text>
+    <line x1="390" y1="299" x2="290" y2="348" stroke="#52606d" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- agent -->
+    <rect x="490" y="350" width="330" height="150" rx="10" fill="#fef3e2" stroke="#b45309" stroke-width="2"/>
+    <text x="655" y="378" font-size="15" font-weight="bold" text-anchor="middle" fill="#b45309">Agent (src/shachi/agent/)</text>
+    <text x="655" y="400" font-size="12" text-anchor="middle" fill="#334e68">async step(observation) → str | BaseModel | None</text>
+    <rect x="510" y="415" width="90" height="30" rx="6" fill="#fff" stroke="#b45309"/><text x="555" y="435" font-size="11.5" text-anchor="middle">LLM</text>
+    <rect x="610" y="415" width="90" height="30" rx="6" fill="#fff" stroke="#b45309"/><text x="655" y="435" font-size="11.5" text-anchor="middle">Tools</text>
+    <rect x="710" y="415" width="90" height="30" rx="6" fill="#fff" stroke="#b45309"/><text x="755" y="435" font-size="11.5" text-anchor="middle">Memory</text>
+    <rect x="560" y="455" width="190" height="30" rx="6" fill="#fff" stroke="#b45309"/><text x="655" y="475" font-size="11.5" text-anchor="middle">Config (update_config)</text>
+    <line x1="510" y1="299" x2="610" y2="348" stroke="#52606d" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- interaction arrows -->
+    <line x1="410" y1="405" x2="488" y2="405" stroke="#15803d" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="449" y="398" font-size="11" text-anchor="middle" fill="#15803d">Observation</text>
+    <line x1="488" y1="465" x2="410" y2="465" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="449" y="458" font-size="11" text-anchor="middle" fill="#b45309">response</text>
+    <text x="450" y="540" font-size="12.5" text-anchor="middle" fill="#52606d">gymスタイルのループ: env.reset() → [agent.step → env.step] × N → env.get_result()</text>
+  </svg>
+  <figcaption>設定 → 実行スクリプト → Task → Environment ⇄ Agent の依存関係と対話ループ</figcaption>
+  </figure>
+</section>
+
+<section id="tree">
+  <h2>3. ディレクトリ構成</h2>
+  <div class="tree">Shachi/
+├── <span class="cfg">configs/</span>                      <span class="c"># Hydra 設定(実験の組み合わせを定義)</span>
+│   ├── config.yaml               <span class="c"># デフォルト: task=psychobench, agent=psychobench, batchsize=16</span>
+│   ├── config_vllm.yaml          <span class="c"># vLLM ローカルサーバ利用時の構成</span>
+│   ├── task/                     <span class="c"># タスク(環境)ごとの設定 ×10</span>
+│   ├── agent/                    <span class="c"># エージェントごとの設定 ×14(random/vllm 変種を含む)</span>
+│   └── launcher/vllm/            <span class="c"># vLLM サーバ起動設定</span>
+├── <span class="core">src/shachi/</span>
+│   ├── __init__.py               <span class="c"># 公開API(Agent, Environment, Task など8クラスを re-export)</span>
+│   ├── <span class="core">base.py</span>                   <span class="c"># ★ 全抽象クラスの定義(358行)— まずここを読む</span>
+│   ├── <span class="agent">agent/</span>                    <span class="c"># エージェント実装(タスクごとに1ファイル)</span>
+│   │   ├── psychobench.py        <span class="c">#   Structured Output / Function Calling / Random 版を提供</span>
+│   │   ├── stockagent.py         <span class="c">#   HistoryMemory(直近N件の履歴)を持つ例</span>
+│   │   ├── auction_arena.py      <span class="c">#   CamelMemory / EmptyMemory を持つ例</span>
+│   │   └── ...                   <span class="c">#   econagent, oasisagent, sotopia, emotionagent 等</span>
+│   └── <span class="env">env/</span>                      <span class="c"># 環境実装(タスクごとに1ディレクトリ)</span>
+│       ├── psychobench/          <span class="c">#   *_env.py に Task+Environment、observation.py に型定義</span>
+│       ├── cognitive_biases/     <span class="c">#   30種のバイアステスト(tests/ 以下に各 config.xml + test.py)</span>
+│       ├── econagent/dep/        <span class="c">#   ai_economist を移植した依存コード</span>
+│       ├── oasis/oasis/          <span class="c">#   SNSプラットフォーム実装(SQLiteスキーマ, recsys 含む)</span>
+│       ├── stockagent/           <span class="c">#   株式市場シミュレーション</span>
+│       ├── sotopia/              <span class="c">#   社会的マルチエージェント対話(Redis 必要)</span>
+│       ├── auction_arena/  emotionBench/  lm_caricature/
+│       └── emergent_analogies_LLM/ <span class="c">  # DigitMat(類推推論)</span>
+├── scripts/
+│   ├── main.py                   <span class="c"># ★ 標準エントリポイント(67行)</span>
+│   ├── main_vllm.py              <span class="c"># vLLM サーバを起動してから実験を実行</span>
+│   ├── main_carrying_memory.py   <span class="c"># 探索的研究: メモリを次のエピソードへ引き継ぐ</span>
+│   └── main_stock_oasis.py       <span class="c"># 探索的研究: 株式市場+SNS の複数世界同時実行</span>
+├── tests/                        <span class="c"># pytest(base の契約・各エージェント・各環境のスモーク)</span>
+├── docs/                         <span class="c"># 実験設定・探索的研究の解説(日英)</span>
+├── outputs/hydra/                <span class="c"># 実行結果の出力先(aggregated_results_*.pkl)</span>
+└── pyproject.toml / uv.lock      <span class="c"># uv による依存管理、ruff / mypy 設定</span></div>
+</section>
+
+<section id="core">
+  <h2>4. コア抽象クラス (base.py)</h2>
+  <p>全クラスが Pydantic ベース(または ABC)で、型安全なデータ交換を強制する。</p>
+  <table>
+    <tr><th>クラス</th><th>役割</th><th>実装者が定義するもの</th></tr>
+    <tr><td><code>Message</code></td><td>エージェント間で交換されるメッセージ。<code>time</code>, <code>src_agent_id</code>, <code>dst_agent_id</code>(None=環境発信/ブロードキャスト)を持つ。</td><td>環境側がサブクラス化し、タスク固有フィールドを追加</td></tr>
+    <tr><td><code>Observation</code></td><td>エージェントが受け取る観測。<code>messages</code>, <code>reward</code>, <code>response_type</code>(期待する応答のPydantic型), <code>tools</code> を持つ。</td><td><code>format_as_prompt_text()</code>(必須)。マルチモーダル時は <code>format_as_prompt_payload()</code> も</td></tr>
+    <tr><td><code>Tool</code> / <code>ToolResponse</code></td><td>エージェントが任意に呼べる関数ツールとその応答。並行実行されるため<b>副作用なし(情報取得のみ)</b>が推奨。環境を変える行動は step の戻り値で返す。</td><td>環境側が <code>parameters_type</code>(Pydantic)と <code>fun</code> を定義</td></tr>
+    <tr><td><code>Environment</code></td><td>シミュレーション環境。gymスタイル。</td><td><code>num_agents()</code>, <code>reset()</code>, <code>step(responses)</code>, <code>done()</code>, <code>get_result()</code>(いずれも必須)+ 任意の <code>get_default_agent_configs()</code></td></tr>
+    <tr><td><code>Task</code></td><td>複数の Environment を束ねる単位(例: 質問紙×ペルソナの全組み合わせ)。</td><td><code>iterate_environments()</code>(非同期イテレータ), <code>aggregate_results()</code></td></tr>
+    <tr><td><code>Agent</code></td><td>意思決定主体。フックは1つだけ。</td><td><code>async step(observation) → str | BaseModel | None</code>(+任意の <code>update_config()</code>)</td></tr>
+    <tr><td><code>BaseMemory</code></td><td>メモリの抽象。<code>add_record()</code> / <code>retrieve()</code> / <code>clear()</code>。実装例: <code>HistoryMemory</code>(stockagent, econagent), <code>CamelMemory</code>(auction_arena, oasis)。</td><td>エージェント側で実装・利用</td></tr>
+  </table>
+  <div class="note"><b>応答の3形態:</b> エージェントの <code>step()</code> は (1) 自由文字列、(2) <code>observation.response_type</code> で指定された Pydantic モデル(Structured Output か Function Calling で生成)、(3) <code>None</code>(行動しない)のいずれかを返す。この規約がエージェント⇄環境間の通信を標準化している。</div>
+</section>
+
+<section id="flow">
+  <h2>5. 実行フロー (scripts/main.py)</h2>
+  <p>エントリポイントはわずか67行。処理は以下の順に進む。</p>
+  <pre><code>uv run scripts/main.py --config-name "config" task=psychobench agent=psychobench</code></pre>
+  <ol>
+    <li><b>Hydra が設定を合成</b> — <code>config.yaml</code> + <code>task/xxx.yaml</code> + <code>agent/yyy.yaml</code> + CLI上書き。</li>
+    <li><b>Task を instantiate</b> — <code>hydra.utils.instantiate(cfg.task)</code> が <code>_target_</code> のクラスを生成。</li>
+    <li><b>環境をバッチで取得</b> — <code>task.iterate_environments()</code> を <code>batchsize</code>(既定16)ごとに束ね、環境ごとにエージェント群を instantiate。環境が <code>get_default_agent_configs()</code> を返す場合は各エージェントへ <code>update_config()</code> で注入(ペルソナ等)。</li>
+    <li><b>エピソード実行(並行)</b> — 各環境で:
+      <pre><code>observations = await env.reset()
+while not env.done():
+    # 全エージェントの step を asyncio.gather で並行実行
+    responses = {id: await agents[id].step(obs) for id, obs in observations.items()}
+    observations = await env.step(responses)
+return env.get_result()</code></pre>
+    バッチ内の複数環境も <code>asyncio.gather</code> で同時進行。</li>
+    <li><b>集計と保存</b> — <code>task.aggregate_results(results)</code> の結果を <code>outputs/hydra/&lt;job&gt;/&lt;日時&gt;/aggregated_results_episode_&lt;i&gt;.pkl</code> に pickle 保存。</li>
+  </ol>
+  <h3>派生スクリプト</h3>
+  <table>
+    <tr><th>スクリプト</th><th>用途</th></tr>
+    <tr><td><code>main_vllm.py</code></td><td>vLLM サーバをサブプロセス起動し、ヘルスチェック後に同じループを実行(ローカルLLM/LoRA実験用)</td></tr>
+    <tr><td><code>main_carrying_memory.py</code></td><td>探索的研究「Carrying Memory to the Next Life」— エピソード間でエージェントのメモリを引き継ぐ</td></tr>
+    <tr><td><code>main_stock_oasis.py</code></td><td>探索的研究「Living in Multiple Worlds」— StockAgentTask と SNSTask を同一エージェントで同時に生きる</td></tr>
+  </table>
+</section>
+
+<section id="config">
+  <h2>6. 設定システム (Hydra)</h2>
+  <p>実験 = <b>task × agent の組み合わせ</b>。どちらも YAML の <code>_target_</code> でクラス/ファクトリ関数を指すため、コードを変えずに CLI から差し替え可能。</p>
+  <div class="grid2">
+    <div>
+      <h3>configs/task/psychobench.yaml</h3>
+      <pre><code>_target_: shachi.env.psychobench
+          .psychobench_env.PsychoBenchTask
+questionnaire: ["BFI", "DTDD", ...]
+num_tests: 10
+max_questions_per_step: 30
+shuffle_questions: True</code></pre>
+    </div>
+    <div>
+      <h3>configs/agent/psychobench.yaml</h3>
+      <pre><code>_target_: shachi.agent.psychobench
+          .create_agents_structuredoutput
+num_agents: null  # main.py が環境から補完
+model: "openai/qwen3.6-35b-a3b"
+model_api_base: "http://..."
+temperature: 0.01
+memory_cls_path: shachi.agent
+                 .stockagent.HistoryMemory</code></pre>
+    </div>
+  </div>
+  <p>CLI での上書き例: <code>task.num_tests=5 agent.temperature=0.7 batchsize=30</code>。ランダムベースライン(<code>agent=psychobench_random</code>)や vLLM 版(<code>agent=sotopia_vllm</code>)への切り替えも同様に1語で済む。出力先は <code>outputs/hydra/${job.name}/${日時}/</code> に自動生成される。</p>
+</section>
+
+<section id="tasks">
+  <h2>7. 実装済み ABM タスク(10種)</h2>
+  <p>各タスクは元論文の実験を Shachi の統一APIに移植したもの。<b>レベル</b>は複雑さの段階を表す(experimental_settings.md の分類):
+    <span class="lv lv1">Level I</span> = 単一エージェントの評価系(心理・認知テスト)、
+    <span class="lv lv2">Level II</span> = マルチエージェントの経済・市場シミュレーション、
+    <span class="lv lv3">Level III</span> = オープンエンドな社会シミュレーション。</p>
+  <div class="note"><b>名前の対応に注意:</b> コード/設定のタスク名と元論文名が異なるものがある — <code>LM_Caricature</code> = 論文の <b>CoMPosT</b>、<code>DigitMat</code>(<code>emergent_analogies_LLM</code>) = 論文の <b>EmergentAnalogies</b>。指標や再現条件を調べるときは <code>docs/experimental_settings.md</code>(日本語版 <code>.ja.md</code>)を一次ソースにする。</div>
+  <p style="font-size:.9em; color:var(--sub);">各カードの「参照」欄: <b>環境</b>=シミュレーションのルール本体、<b>エージェント</b>=LLM呼び出し、<b>タスク設定/エージェント設定</b>=CLIで変えられるパラメータ、<b>指標</b>=一次ソース。</p>
+
+  <h3 class="lvhead">Level I — 単一エージェントの評価系</h3>
+
+  <div class="taskcard">
+    <h3>PsychoBench <span class="lv lv1">Level I</span> <span class="alias">Huang et al., 2023</span></h3>
+    <p><span class="lbl">何を測るか:</span> 心理測定尺度を使って LLM の人間らしい心理特性を測定。13次元(Big Five, Dark Triad, BSRI, GSE, EIS 等)を「パーソナリティ / 対人 / 動機 / 情動」の4カテゴリで評価。</p>
+    <p><span class="lbl">仕組み:</span> 尺度をプロンプトで提示 → エージェントがリッカート尺度(例1〜5)で全問に数値回答 → structured output でパース。質問順をシャッフルして複数シードで頑健性を確保。</p>
+    <p><span class="lbl">主な設定:</span> <code>questionnaire</code>(BFI, DTDD 等13種), <code>num_tests=10</code>, <code>max_questions_per_step=30</code>, <code>shuffle_questions</code>, <code>max_parse_retries=10</code>。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/psychobench/</code>(<code>psychobench_env.py</code>, <code>observation.py</code>, <code>questionnaires.json</code>)</div>
+      <div><span class="k">エージェント</span> <code>agent/psychobench.py</code>(structured output / function calling / random の3版)</div>
+      <div><span class="k">設定</span> <code>configs/task/psychobench.yaml</code> / <code>configs/agent/psychobench.yaml</code>(+ <code>_random</code>)</div>
+      <div><span class="k">起動</span> <code>task=psychobench agent=psychobench</code></div>
+      <div><span class="k">指標</span> 各サブスケールのスコア(原論文とのMAE)</div>
+    </div>
+  </div>
+
+  <div class="taskcard">
+    <h3>LM_Caricature <span class="lv lv1">Level I</span> <span class="alias">CoMPosT / Cheng et al., 2023</span></h3>
+    <p><span class="lbl">何を測るか:</span> LLM がペルソナを「カリカチュア(戯画化)」する度合い。</p>
+    <p><span class="lbl">仕組み:</span> シミュレーションを context / model / persona / topic の4次元で規定し、ペルソナ発話(Twitter・オンラインフォーラム風)を生成。<b>individuation</b>(デフォルトのペルソナと区別できるか)と <b>exaggeration</b>(特徴の誇張度)の2指標で評価。</p>
+    <p><span class="lbl">主な設定:</span> <code>scenario=twitter</code>(or <code>onlineforum</code>), <code>model=openai/gpt-4o</code>, <code>num_agents=100</code>, <code>num_per_gen=1</code>。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/lm_caricature/</code>(<code>lm_caricature_env.py</code>)</div>
+      <div><span class="k">エージェント</span> <code>agent/lm_caricature.py</code></div>
+      <div><span class="k">設定</span> <code>configs/task/lm_caricature.yaml</code> / <code>configs/agent/lm_caricature.yaml</code></div>
+      <div><span class="k">起動</span> <code>task=lm_caricature agent=lm_caricature task.scenario=onlineforum</code></div>
+      <div><span class="k">指標</span> 分布のソート済みスコア間のMAE(Bonnotte, 2013)</div>
+    </div>
+  </div>
+
+  <div class="taskcard">
+    <h3>Cognitive Biases <span class="lv lv1">Level I</span> <span class="alias">Malberg et al., 2024</span></h3>
+    <p><span class="lbl">何を測るか:</span> アンカリング・フレーミング等 <b>30種の認知バイアス</b>を LLM がどれだけ示すか。</p>
+    <p><span class="lbl">仕組み:</span> 200の意思決定シナリオ × 対照/処置条件でテストケースを生成し、応答差を比較。7段階リッカート or 11段階％の回答尺度、選択肢順を反転してポジションバイアスを補正。</p>
+    <p><span class="lbl">主な設定:</span> <code>target_biases</code>(30種), <code>dataset_file_path=data/full_dataset.csv</code><b>(別途DLが必要)</b>, <code>randomly_flip_options=True</code>。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/cognitive_biases/</code>(<code>cognitive_biases_env.py</code>, <code>analysis.py</code> は UMAP 可視化)</div>
+      <div><span class="k">エージェント</span> <code>agent/cognitive_biases_agent.py</code></div>
+      <div><span class="k">設定</span> <code>configs/task/cognitive_biases.yaml</code> / <code>configs/agent/cognitive_biases.yaml</code></div>
+      <div><span class="k">起動</span> <code>task=cognitive_biases agent=cognitive_biases</code></div>
+      <div><span class="k">指標</span> バイアススコア(原論文とのMAE)。メモリ転移実験のターゲットにも使われる</div>
+    </div>
+  </div>
+
+  <div class="taskcard">
+    <h3>EmotionBench <span class="lv lv1">Level I</span> <span class="alias">Huang et al., 2024</span></h3>
+    <p><span class="lbl">何を測るか:</span> 実生活の状況に対する情動反応(怒り・不安・抑うつ・フラストレーション・嫉妬・罪悪感・恐怖・当惑の8情動)。</p>
+    <p><span class="lbl">仕組み:</span> PANAS 等の自己報告尺度で、①デフォルトの情動状態を測定 → ②状況プロンプトを提示 → ③情動スコアの変化を再測定。</p>
+    <p><span class="lbl">主な設定:</span> <code>questionnaire=PANAS</code>, <code>emotion=ALL</code>, <code>select_count=5</code>, <code>seed=42</code>。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/emotionBench/</code>(<code>emotionenv.py</code>)</div>
+      <div><span class="k">エージェント</span> <code>agent/emotionagent.py</code></div>
+      <div><span class="k">設定</span> <code>configs/task/emotionbench.yaml</code> / <code>configs/agent/emotionbench.yaml</code></div>
+      <div><span class="k">起動</span> <code>task=emotionbench agent=emotionbench</code></div>
+      <div><span class="k">指標</span> 情動スコア(原コードとのMAE)</div>
+    </div>
+  </div>
+
+  <div class="taskcard">
+    <h3>DigitMat <span class="lv lv1">Level I</span> <span class="alias">EmergentAnalogies / Webb et al., 2023</span></h3>
+    <p><span class="lbl">何を測るか:</span> ゼロショットの類推推論(流動性知能)。</p>
+    <p><span class="lbl">仕組み:</span> 原論文の4課題のうち<b>マトリクス推論(数字行列)</b>を対象に、自由記述での正答率を問題カテゴリ別に評価。</p>
+    <p><span class="lbl">主な設定:</span> <code>data_path=all_problems_1thru5.npz</code>, <code>each_prob_num=20</code>, <code>target_prob_types=null</code>(全カテゴリ)。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/emergent_analogies_LLM/digit_mat/</code>(<code>digitmat_env.py</code>)</div>
+      <div><span class="k">エージェント</span> <code>agent/digitmat_agent.py</code></div>
+      <div><span class="k">設定</span> <code>configs/task/digitmat.yaml</code> / <code>configs/agent/digitmat.yaml</code></div>
+      <div><span class="k">起動</span> <code>task=digitmat agent=digitmat</code></div>
+      <div><span class="k">指標</span> カテゴリ別正答率(原論文とのMAE)</div>
+    </div>
+  </div>
+
+  <h3 class="lvhead">Level II — マルチエージェントの経済・市場シミュレーション</h3>
+
+  <div class="taskcard">
+    <h3>EconAgent <span class="lv lv2">Level II</span> <span class="alias">Li et al., 2024</span></h3>
+    <p><span class="lbl">何を測るか:</span> 人間らしい振る舞いをともなうマクロ経済シミュレーション(GDP・インフレ等)。</p>
+    <p><span class="lbl">仕組み:</span> Zheng et al.(2022)の仮想経済(ai_economist を移植)。各エージェントがスキル/富を持ち労働・消費を決定 → 集合的にマクロ動態が生まれる。ルールベース環境が中央政府(税)+中央銀行(金利)として機能。</p>
+    <p><span class="lbl">主な設定:</span> <code>num_agents=100</code>, <code>episode_length=240</code>(月=20回の課税・金融サイクル), <code>dialog_len=3</code>, <code>max_price_inflation=0.1</code>。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/econagent/</code>(<code>econenv.py</code>, <code>dep/</code> に ai_economist)</div>
+      <div><span class="k">エージェント</span> <code>agent/econagent.py</code></div>
+      <div><span class="k">設定</span> <code>configs/task/econagent.yaml</code> / <code>configs/agent/econagent.yaml</code>(+ <code>_staticbaseline</code>)</div>
+      <div><span class="k">起動</span> <code>task=econagent agent=econagent task.episode_length=240 task.num_agents=100</code></div>
+      <div><span class="k">指標</span> メモリ転移後の認知バイアススコア 等(探索的研究で使用)</div>
+    </div>
+  </div>
+
+  <div class="taskcard">
+    <h3>StockAgent <span class="lv lv2">Level II</span> <span class="alias">Zhang et al., 2024</span></h3>
+    <p><span class="lbl">何を測るか:</span> 動的な市場環境下の株式取引シミュレーション。</p>
+    <p><span class="lbl">仕組み:</span> イベント駆動。エージェントが順次「融資→売買→予測→フォーラム投稿・確認」を決定し、株価が日々変動。Stock A(化学・10年)/Stock B(テック・3年)をモデル化。投資スタイル4種、履歴メモリ(直近3件)、フォーラムAPI(ツール)を使う。</p>
+    <p><span class="lbl">主な設定:</span> <code>num_agents=50</code>, <code>total_date=264</code>, <code>total_session=3</code>, <code>order_book=false</code>。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/stockagent/</code>(<code>stockenv.py</code>。<code>procoder</code> に依存)</div>
+      <div><span class="k">エージェント</span> <code>agent/stockagent.py</code>(<code>HistoryMemory</code> の実装例)</div>
+      <div><span class="k">設定</span> <code>configs/task/stockagent.yaml</code> / <code>configs/agent/stockagent.yaml</code></div>
+      <div><span class="k">起動</span> <code>task=stockagent agent=stockagent</code></div>
+      <div><span class="k">指標</span> セッションレベルの価格動態(MAE)、ボラティリティ(価格変化率)</div>
+    </div>
+  </div>
+
+  <div class="taskcard">
+    <h3>AuctionArena <span class="lv lv2">Level II</span> <span class="alias">Chen et al., 2023</span></h3>
+    <p><span class="lbl">何を測るか:</span> 動的オークションでの戦略的計画・実行能力(資源配分・リスク管理・適応的推論)。</p>
+    <p><span class="lbl">仕組み:</span> 競り上げ式オークションで、エージェントが入札者として <b>BDI(Belief-Desire-Intention)</b>フレームに基づき意思決定。価値の意図的な過大評価で「勝者の呪い」を再現し、"profit-first" 戦略を割り当てる。</p>
+    <p><span class="lbl">主な設定:</span> <code>num_auctions=10</code>, <code>item_order=random</code>, <code>bidders</code>(予算20000・maximize_profit ×3), <code>items</code>(10品目、_true_value と estimated_value)。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/auction_arena/</code>(<code>auction_env.py</code>, <code>bidder.py</code>, <code>prompt_base.py</code>)</div>
+      <div><span class="k">エージェント</span> <code>agent/auction_arena.py</code>(<code>CamelMemory</code> / <code>EmptyMemory</code> の例)</div>
+      <div><span class="k">設定</span> <code>configs/task/auction_arena.yaml</code> / <code>configs/agent/auction_arena.yaml</code>(+ <code>_random</code>)</div>
+      <div><span class="k">起動</span> <code>task=auction_arena agent=auction_arena</code></div>
+      <div><span class="k">指標</span> 利益順位から算出した TrueSkill スコア(原メインエージェントとのMAE)</div>
+    </div>
+  </div>
+
+  <h3 class="lvhead">Level III — オープンエンドな社会シミュレーション</h3>
+
+  <div class="taskcard">
+    <h3>Sotopia <span class="lv lv3">Level III</span> <span class="alias">Zhou et al., 2024</span></h3>
+    <p><span class="lbl">何を測るか:</span> オープンエンドなロールプレイ対話における社会的知能。7指標(SOC / SEC / FIN / REL / KNO / GOAL / BEL)で多次元評価。</p>
+    <p><span class="lbl">仕組み:</span> 2エージェントが200の社会シナリオで対話。<b>Shachi 版の要点:</b> 原実装は全対話履歴を毎回プロンプトに連結するが、Shachi ではメモリ管理をエージェント側の責務とし、環境は最新メッセージのみを渡す。<b>要 Redis / Docker</b>(<code>uv run sotopia install</code>)。</p>
+    <p><span class="lbl">主な設定:</span> <code>SotopiaTask</code>(設定はほぼ空で、内部でデータセット/シナリオを参照)。バッチ実行例では <code>batchsize=30</code>。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/sotopia/</code>(<code>environment.py</code>)</div>
+      <div><span class="k">エージェント</span> <code>agent/sotopia.py</code></div>
+      <div><span class="k">設定</span> <code>configs/task/sotopia.yaml</code> / <code>configs/agent/sotopia.yaml</code>(+ <code>_random</code> / <code>_vllm</code>)</div>
+      <div><span class="k">起動</span> <code>task=sotopia agent=sotopia batchsize=30</code></div>
+      <div><span class="k">指標</span> 7指標(原結果とのMAE)</div>
+    </div>
+  </div>
+
+  <div class="taskcard">
+    <h3>OASIS <span class="lv lv3">Level III</span> <span class="alias">Yang et al., 2024</span></h3>
+    <p><span class="lbl">何を測るか:</span> 最大100万エージェントの SNS シミュレーション(情報伝播・集団分極化・群集効果)。</p>
+    <p><span class="lbl">仕組み:</span> 環境サーバ + 推薦システム + タイムエンジンで大規模SNSを再現。各ユーザーは21種のアクション空間(投稿・コメント・フォロー等)を持つ LLM エージェント。X風 / Reddit風の設定があり、本実装では X風を利用。</p>
+    <p><span class="lbl">主な設定:</span> <code>config_path=gpt_example.yaml</code>, <code>max_steps=10</code>, <code>num_parallel=3</code>。</p>
+    <div class="files">
+      <div><span class="k">環境</span> <code>env/oasis/</code>(<code>snsenv.py</code>, <code>oasis/</code> に SQLite スキーマ・recsys)</div>
+      <div><span class="k">エージェント</span> <code>agent/oasisagent.py</code></div>
+      <div><span class="k">設定</span> <code>configs/task/oasis.yaml</code> / <code>configs/agent/oasis.yaml</code></div>
+      <div><span class="k">起動</span> <code>task=oasis agent=oasis</code></div>
+      <div><span class="k">指標</span> 定性的な投稿/返信の振る舞い、メモリ転移後のバイアススコア(探索的研究)</div>
+    </div>
+  </div>
+
+  <div class="note"><b>環境ディレクトリの典型構成:</b> <code>*_env.py</code>(Task と Environment の実装)+ <code>observation.py</code> 等の型定義 + 元論文由来のデータ・依存コード。規模はタスクにより大きく異なる(lm_caricature は小規模、cognitive_biases / oasis は多数のファイル)。</div>
+</section>
+
+<section id="answering">
+  <h2>8. 読み解き方 — どれを参照してどう答えるか</h2>
+  <p>質問に答えるときは、まず<b>「フレームワーク共通の話」か「特定タスクの話」か</b>を切り分ける。共通なら <code>base.py</code> と <code>scripts/main.py</code>、タスク固有ならセクション7のカードにある <b>環境 / エージェント</b>のペアを見る。下表は質問タイプ別の参照先。</p>
+  <table class="answer-table">
+    <tr><th>質問のタイプ</th><th>まず見る場所</th><th>答え方のポイント</th></tr>
+    <tr>
+      <td>フレームワークの仕組み全般<br>(層構造・データの流れ)</td>
+      <td><code>src/shachi/base.py</code> → <code>scripts/main.py</code></td>
+      <td>8つの抽象クラスの契約(セクション4)と gym ループ(セクション5)で説明。Observation⇄response の疎結合が肝。</td>
+    </tr>
+    <tr>
+      <td>「タスクXの仕組み・ルールは?」<br>状態がどう進むか</td>
+      <td><code>env/&lt;task&gt;/*_env.py</code> の <code>reset()</code> / <code>step()</code> と <code>observation.py</code></td>
+      <td>step で状態がどう更新され、どんな Observation(と <code>response_type</code>)がエージェントに渡るかを追う。</td>
+    </tr>
+    <tr>
+      <td>「LLM に何をどうプロンプトしているか」<br>「何を返させているか」</td>
+      <td><code>agent/&lt;task&gt;.py</code> の <code>step()</code></td>
+      <td>system/user メッセージの組み立てと、<code>litellm.acompletion(...)</code> の引数(<code>response_format=</code> or <code>tools=</code>)を見る。多くは plan(自由記述)→ parse(型に整形)の2段構成。</td>
+    </tr>
+    <tr>
+      <td>指標・再現条件・使用モデル・<br>ベースライン・実行時間</td>
+      <td><code>docs/experimental_settings.md</code>(日本語 <code>.ja.md</code>)</td>
+      <td>タスクごとに Description / Method / Reproduction / Metric がある。<b>数値・指標はここを一次ソースに</b>。論文名(CoMPosT 等)で書かれている点に注意。</td>
+    </tr>
+    <tr>
+      <td>設定で変えられるパラメータ</td>
+      <td><code>configs/task/&lt;task&gt;.yaml</code> と <code>configs/agent/&lt;task&gt;.yaml</code></td>
+      <td><code>_target_</code> が生成するクラス/関数。各キーは CLI で <code>task.xxx=</code> / <code>agent.xxx=</code> と上書き可能(セクション6)。</td>
+    </tr>
+    <tr>
+      <td>起動方法・CLIオプション</td>
+      <td><code>README.md</code> のタスク表 → <code>scripts/main.py</code></td>
+      <td><code>task=… agent=… batchsize=…</code> の組み合わせ。ランダム版/vllm版は <code>agent=&lt;task&gt;_random</code> 等に1語差し替え。</td>
+    </tr>
+    <tr>
+      <td>メモリ / ツールの扱い</td>
+      <td><code>base.py</code>(<code>BaseMemory</code>, <code>Tool</code>)+ <code>agent/&lt;task&gt;.py</code> の <code>memory_cls</code></td>
+      <td>実装例: <code>HistoryMemory</code>(stock/econ)、<code>CamelMemory</code>(auction/oasis)。ツールは副作用なしが原則。</td>
+    </tr>
+    <tr>
+      <td>出力はどこ・何形式か</td>
+      <td><code>scripts/main.py</code> + Task の <code>aggregate_results()</code></td>
+      <td><code>outputs/hydra/&lt;job&gt;/&lt;日時&gt;/aggregated_results_episode_&lt;i&gt;.pkl</code> に pickle 保存。</td>
+    </tr>
+    <tr>
+      <td>探索的研究<br>(メモリ持越し/複数世界/LoRA)</td>
+      <td><code>docs/exploratory_studies.md</code>(<code>.ja.md</code>)+ <code>scripts/main_carrying_memory.py</code> / <code>main_stock_oasis.py</code> / <code>main_vllm.py</code></td>
+      <td>それぞれ「Carrying Memory」「Living in Multiple Worlds」「LoRA重み実験」に対応。</td>
+    </tr>
+    <tr>
+      <td>期待される正しい動作<br>(エージェント/環境の契約)</td>
+      <td><code>tests/</code>(セクション9)</td>
+      <td>litellm をモックした振る舞いが「正解の仕様」。実装の意図を確認するのに有効。</td>
+    </tr>
+  </table>
+  <div class="note"><b>回答の手順(推奨):</b>
+    <ol style="margin:6px 0 0;">
+      <li>質問を「共通 / タスク固有」に分類する。</li>
+      <li>タスク固有なら、セクション7のカードで<b>環境とエージェントのペア</b>を特定して読む(仕組みは環境、プロンプトはエージェント)。</li>
+      <li>数値・指標・再現条件は <code>experimental_settings.md</code> を引用する(推測しない)。</li>
+      <li>設定可能な値は該当 YAML の実際のキーで答える。</li>
+      <li><b>コードとドキュメントが食い違う場合はコードを優先</b>し、このガイド/docs の日付が古くないか確認する。</li>
+    </ol>
+  </div>
+</section>
+
+<section id="extend">
+  <h2>9. 拡張方法 — 自分のエージェント/環境を書く</h2>
+  <div class="grid2">
+    <div>
+      <h3><span class="tag agent">新しいエージェント</span></h3>
+      <ol>
+        <li><code>shachi.Agent</code> を継承し <code>async step()</code> を実装</li>
+        <li><code>observation.format_as_prompt_payload()</code> でプロンプト化</li>
+        <li><code>observation.response_type</code> があれば Structured Output(<code>response_format=</code>)か Function Calling(<code>tools=</code>)で型に合わせて返す</li>
+        <li><code>configs/agent/</code> に <code>_target_</code> 付き YAML を追加</li>
+      </ol>
+    </div>
+    <div>
+      <h3><span class="tag env">新しい環境</span></h3>
+      <ol>
+        <li><code>Message</code>/<code>Observation</code> のサブクラスで通信の型を定義</li>
+        <li><code>shachi.Environment</code> を継承し gym の5フックを実装</li>
+        <li>複数条件を回すなら <code>Task</code> を実装(<code>iterate_environments</code> / <code>aggregate_results</code>)</li>
+        <li><code>configs/task/</code> に YAML を追加</li>
+      </ol>
+    </div>
+  </div>
+  <p>最小の実装例(じゃんけん環境と Structured Output エージェント)は README の「How to Write Your Agent / Environment」に完全なコード付きで掲載されている。</p>
+</section>
+
+<section id="tests">
+  <h2>10. テスト・品質管理</h2>
+  <table>
+    <tr><th>ファイル</th><th>検証内容</th></tr>
+    <tr><td><code>tests/test_base.py</code></td><td>base.py の抽象クラス契約(Pydantic バリデーション等)</td></tr>
+    <tr><td><code>tests/test_agent_implementations.py</code></td><td>全エージェントを litellm モックでテスト — Structured Output / Function Calling 両モードと random 版の契約確認</td></tr>
+    <tr><td><code>tests/test_environments.py</code></td><td>各環境の reset/step/done/get_result のスモークテスト</td></tr>
+    <tr><td><code>tests/test_sanity.py</code></td><td>基本の健全性チェック</td></tr>
+  </table>
+  <p>品質ツールは <code>pyproject.toml</code> で構成: <b>ruff</b>(lint/format)、<b>mypy</b>(型検査)、GitHub Actions(<code>.github/workflows/checks.yml</code>)でCI実行。依存管理は <b>uv</b>(<code>uv sync</code> で環境構築、Python 3.10+)。</p>
+  <div class="note"><b>読み進める順序の推奨:</b> ① <code>src/shachi/base.py</code>(契約を理解)→ ② <code>scripts/main.py</code>(実行ループ)→ ③ <code>configs/config.yaml</code> と task/agent の YAML 1組 → ④ 興味のあるタスクの <code>agent/*.py</code> と <code>env/*/</code> のペア(psychobench が最も標準的)→ ⑤ <code>tests/</code> で期待動作を確認。</div>
+</section>
+
+</main>
+<footer>Shachi コードベース構造ガイド — 2026-07-12 時点のリポジトリ構成に基づく</footer>
+</body>
+</html>

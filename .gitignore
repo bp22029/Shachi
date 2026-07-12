@@ -190,3 +190,13 @@ cython_debug/
 
 # macOS system files
 .DS_Store
+
+inference_test.py
+
+# Editor
+.vscode/
+
+# ローカル用の診断・補助スクリプト(コミットしない)
+diag_concurrency.py
+diag_psychobench.py
+view_results.py
